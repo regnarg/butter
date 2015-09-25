@@ -3,6 +3,11 @@
 Release History
 ---------------
 
+0.11.2 (2015-09-27)
++++++++++++++++++++
+
+- Document cffi bootstrap issues in README
+
 0.11.1 (2015-06-14)
 +++++++++++++++++++
 
