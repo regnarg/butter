@@ -5,9 +5,15 @@ from .utils import Eventlike as _Eventlike
 from .utils import CLOEXEC_DEFAULT as _CLOEXEC_DEFAULT
 from ._timerfd import TimerVal, timerfd, timerfd_gettime, timerfd_settime
 from ._timerfd import TFD_CLOEXEC, TFD_NONBLOCK, TFD_TIMER_ABSTIME
-from ._timerfd import CLOCK_REALTIME, CLOCK_MONOTONIC
+
+from ._timerfd import CLOCK_BOOTTIME, CLOCK_PROCESS_CPUTIME_ID, CLOCK_THREAD_CPUTIME_ID
+from ._timerfd import CLOCK_MONOTONIC, CLOCK_MONOTONIC_RAW, CLOCK_MONOTONIC_COARSE
+from ._timerfd import CLOCK_REALTIME, CLOCK_REALTIME_COARSE
+from ._timerfd import CLOCK_REALTIME_ALARM, CLOCK_BOOTTIME_ALARM
+
 from ._timerfd import ffi as _ffi
 import os as _os
+
 
 class Timer(_Eventlike, TimerVal):
     """Timer is both an event like object providing the file-like/event-like interface as well
