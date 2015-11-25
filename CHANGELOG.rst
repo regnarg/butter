@@ -3,6 +3,11 @@
 Release History
 ---------------
 
+0.12 (2015-09-27)
++++++++++++++++++++
+
+- Add support for new timer types including 'slack' timers and timers that can wake a system from suspend
+
 0.11.2 (2015-09-27)
 +++++++++++++++++++
 

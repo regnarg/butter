@@ -37,6 +37,8 @@ Whats Available
  * getppid (bypasses glibc caching)
  * eventfd (includes asyncio support)
  * timerfd (includes asyncio support)
+ * 'sloppy' timers (inaccurate timers that may experince jitter for power saving)
+ # Wake timers (timers that may wake a system from suspend)
  * pthread_sigmask (Avalible in python3.x but backported for python2.7)
  * signalfd (includes asyncio support)
 
