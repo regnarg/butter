@@ -25,7 +25,7 @@ int setns(int fd, int nstype);
 """)
   
 
-C = ffi.verify("""  
+_C = ffi.verify("""  
 #include <sched.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -41,19 +41,19 @@ int setns(int fd, int nstype) {
 };
 """, libraries=[], ext_package="butter")
 
-CLONE_ALL = C.CLONE_NEWIPC  | \
-            C.CLONE_NEWNET  | \
-            C.CLONE_NEWNS   | \
-            C.CLONE_NEWUTS  | \
-            C.CLONE_NEWPID  | \
-            C.CLONE_NEWUSER
+CLONE_ALL = _C.CLONE_NEWIPC  | \
+            _C.CLONE_NEWNET  | \
+            _C.CLONE_NEWNS   | \
+            _C.CLONE_NEWUTS  | \
+            _C.CLONE_NEWPID  | \
+            _C.CLONE_NEWUSER
 
-CLONE_NEWNS = C.CLONE_NEWNS
-CLONE_NEWUTS = C.CLONE_NEWUTS
-CLONE_NEWIPC = C.CLONE_NEWIPC
-CLONE_NEWUSER = C.CLONE_NEWUSER
-CLONE_NEWPID = C.CLONE_NEWPID
-CLONE_NEWNET = C.CLONE_NEWNET
+CLONE_NEWNS = _C.CLONE_NEWNS
+CLONE_NEWUTS = _C.CLONE_NEWUTS
+CLONE_NEWIPC = _C.CLONE_NEWIPC
+CLONE_NEWUSER = _C.CLONE_NEWUSER
+CLONE_NEWPID = _C.CLONE_NEWPID
+CLONE_NEWNET = _C.CLONE_NEWNET
 
 
 def unshare(flags):
@@ -79,7 +79,7 @@ def unshare(flags):
     -----------
     :raises ValueError: Invalid value in flags
     """
-    fd = C.unshare(flags)
+    fd = _C.unshare(flags)
 
     if fd < 0:
         err = ffi.errno
@@ -103,11 +103,11 @@ def unshare(flags):
 def main():
     import os, errno, sys
     
-#    ret = C.__clone(CLONE_NEWNET|CLONE_NEWUTS|CLONE_NEWIPC|CLONE_NEWNS, ffi.NULL)
-#    ret = C.__clone(CLONE_NEWNET|CLONE_NEWUTS|CLONE_NEWIPC|CLONE_NEWNS, ffi.NULL, ffi.NULL, ffi.NULL, ffi.NULL)
+#    ret = _C.__clone(CLONE_NEWNET|CLONE_NEWUTS|CLONE_NEWIPC|CLONE_NEWNS, ffi.NULL)
+#    ret = _C.__clone(CLONE_NEWNET|CLONE_NEWUTS|CLONE_NEWIPC|CLONE_NEWNS, ffi.NULL, ffi.NULL, ffi.NULL, ffi.NULL)
 
-    ret = C.unshare(CLONE_NEWNET|CLONE_NEWUTS|CLONE_NEWIPC|CLONE_NEWNS)
-#    ret = C.unshare(CLONE_ALL)
+    ret = _C.unshare(CLONE_NEWNET|CLONE_NEWUTS|CLONE_NEWIPC|CLONE_NEWNS)
+#    ret = _C.unshare(CLONE_ALL)
     if ret >= 0:
 #        with open("/proc/self/uid_map", "w") as f:
 #            f.write("0 0 1\n")
