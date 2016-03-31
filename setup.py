@@ -5,7 +5,6 @@ from setuptools import setup
 
 import platform
 
-
 name = 'butter'
 path = 'butter'
 
@@ -28,6 +27,16 @@ if platform.linux_distribution()[0] == 'debian' and \
     pass
 else:
     ext_modules.append(name + '/build/seccomp.py:ffi')
+
+# work around for build failure on pypy, cannot set _GNU_SOURCE
+# in ffi.set_source as stdlib being imported before it is hit
+# (ie its not first line in file)
+# not making this platform specific as it is not breaking cpython
+# this likley breaks mucl as well but that can be fixed as required
+import os
+CURRENT_CFLAGS = os.environ.get('CFLAGS', '')
+NEW_CFLAGS = "-D_GNU_SOURCE " + CURRENT_CFLAGS
+os.environ['CFLAGS'] = NEW_CFLAGS
 
 ## Automatically determine project version ##
 try:
