@@ -26,7 +26,7 @@ int setns(int fd, int nstype);
   
 
 _C = ffi.verify("""  
-#include <sched.h>
+#include <linux/sched.h>
 #include <unistd.h>
 #include <sys/types.h>
 
