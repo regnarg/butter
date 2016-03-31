@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""fanotify: wrapper aroudn the fanotify family of syscalls for watching for file modifcation"""
+"""fanotify: wrapper around the fanotify family of syscalls for watching for file modifcation"""
 from __future__ import print_function
 
 from cffi import FFI as _FFI
