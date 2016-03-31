@@ -29,7 +29,6 @@ C = ffi.verify("""
 #include <sched.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <unistd.h>
 
 // man page
 //long __clone(unsigned long flags, void *child_stack, ...);
