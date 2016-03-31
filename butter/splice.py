@@ -170,9 +170,9 @@ def vmsplice(fd, vec, flags=0):
     assert isinstance(flags, int), 'flags must be an integer'
 
     n_vec =_ffi.new('struct iovec[]', len(vec))
-    for str, v in zip(vec, n_vec) :
-        v.iov_base = _lib.convert_str_to_void(str)
-        v.iov_len = len(str)
+    for s, v in zip(vec, n_vec) :
+        v.iov_base = _lib.convert_str_to_void(s)
+        v.iov_len = len(s)
     
     size = _lib.vmsplice(fd, n_vec, len(vec), flags)
 
