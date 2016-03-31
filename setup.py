@@ -27,7 +27,6 @@ if platform.linux_distribution()[0] == 'debian' and \
     # no seccomp.h in debian wheezy by default
     pass
 else:
-    from butter import seccomp
     ext_modules.append(name + '/build/seccomp.py:ffi')
 
 ## Automatically determine project version ##
