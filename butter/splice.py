@@ -1,48 +1,11 @@
 #!/usr/bin/env python
 """splice: wrapper around the splice() syscall"""
 
-from __future__ import print_function
-
 from .utils import UnknownError
-from cffi import FFI as _FFI
 import errno as _errno
 
-_ffi = _FFI()
-_ffi.cdef("""
-#define SPLICE_F_MOVE     ... /* This is a noop in modern kernels and is left here for compatibility */
-#define SPLICE_F_NONBLOCK ... /* Make splice operations Non blocking (as long as the fd's are non blocking) */
-#define SPLICE_F_MORE     ... /* After splice() more data will be sent, this is a hint to add TCP_CORK like buffering */
-#define SPLICE_F_GIFT     ... /* unused for splice() (vmsplice compatibility) */
-
-#define IOV_MAX ... /* Maximum ammount of vectors that can be written by vmsplice in one go */
-
-struct iovec {
-    void *iov_base; /* Starting address */
-    size_t iov_len; /* Number of bytes */
-};
-
-ssize_t splice(int fd_in, signed long long *off_in, int fd_out, signed long long *off_out, size_t len, unsigned int flags);
-ssize_t tee(int fd_in, int fd_out, size_t len, unsigned int flags);
-ssize_t vmsplice(int fd, const struct iovec *iov, unsigned long nr_segs, unsigned int flags);
-
-char * convert_str_to_void(char * buf);
-""")
-
-_C = _ffi.verify("""
-#include <limits.h> /* used to define IOV_MAX */
-#include <fcntl.h>
-#include <sys/uio.h>
-
-/* Its really hard in cffi to convert a python string to a char * WITHOUT using a function
-   so instead lets just make a dummy function and use that. while we are at it, lets do
-   the conversion to a void pointer as well so we dont need to much with types
-*/
-void * convert_str_to_void(char * buf){
-    /* Take a string and convert it over to a void pointer */
-    /* While simple, this is a work around for the cffi lib in python */
-    return (void *)buf;
-};
-""", libraries=[], ext_package="butter")
+from _splice_c import ffi as _ffi
+from _splice_c import lib as _lib
 
 def splice(fd_in, fd_out, in_offset=0, out_offset=0, len=0, flags=0):
     """Take data from fd_in and pass it to fd_out without going through userspace
@@ -94,7 +57,7 @@ def splice(fd_in, fd_out, in_offset=0, out_offset=0, len=0, flags=0):
     in_offset = _ffi.cast("long long *", in_offset)
     out_offset = _ffi.cast("long long *", out_offset)
 
-    size = _C.splice(fd_in, in_offset, fd_out, out_offset, len, flags)
+    size = _lib.splice(fd_in, in_offset, fd_out, out_offset, len, flags)
     
     if size < 0:
         err = _ffi.errno
@@ -156,7 +119,7 @@ def tee(fd_in, fd_out, len=0, flags=0):
     assert isinstance(len, int), 'len must be an integer'
     assert isinstance(flags, int), 'flags must be an integer'
 
-    size = _C.tee(fd_in, fd_out, len, flags)
+    size = _lib.tee(fd_in, fd_out, len, flags)
     
     if size < 0:
         err = _ffi.errno
@@ -208,10 +171,10 @@ def vmsplice(fd, vec, flags=0):
 
     n_vec =_ffi.new('struct iovec[]', len(vec))
     for str, v in zip(vec, n_vec) :
-        v.iov_base = _C.convert_str_to_void(str)
+        v.iov_base = _lib.convert_str_to_void(str)
         v.iov_len = len(str)
     
-    size = _C.vmsplice(fd, n_vec, len(vec), flags)
+    size = _lib.vmsplice(fd, n_vec, len(vec), flags)
 
     if size < 0:
         err = _ffi.errno
@@ -228,9 +191,9 @@ def vmsplice(fd, vec, flags=0):
     return size
 
 
-SPLICE_F_MOVE = _C.SPLICE_F_MOVE    
-SPLICE_F_NONBLOCK = _C.SPLICE_F_NONBLOCK
-SPLICE_F_MORE = _C.SPLICE_F_MORE    
-SPLICE_F_GIFT = _C.SPLICE_F_GIFT    
+SPLICE_F_MOVE = _lib.SPLICE_F_MOVE    
+SPLICE_F_NONBLOCK = _lib.SPLICE_F_NONBLOCK
+SPLICE_F_MORE = _lib.SPLICE_F_MORE    
+SPLICE_F_GIFT = _lib.SPLICE_F_GIFT    
 
-IOV_MAX = _C.IOV_MAX
+IOV_MAX = _lib.IOV_MAX

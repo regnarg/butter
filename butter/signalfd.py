@@ -8,7 +8,8 @@ from ._signalfd import SIG_BLOCK, SIG_UNBLOCK, SIG_SETMASK
 from ._signalfd import SIGINFO_LENGTH as _SIGINFO_LENGTH
 from ._signalfd import signalfd, pthread_sigmask
 from ._signalfd import signum_to_signame
-from ._signalfd import ffi as _ffi, C as _C
+from ._signalfd_c import ffi as _ffi
+from ._signalfd_c import lib as _lib
 import os as _os
 
 
@@ -35,7 +36,7 @@ class Signalfd(_Eventlike):
         self._fd = signalfd(sigmask, NEW_SIGNALFD, flags)
         
     def __contains__(self, signal):
-        val = _C.sigismember(self._sigmask, signal)
+        val = _lib.sigismember(self._sigmask, signal)
         
         if val < 0:
             raise ValueError('Signal is not a valid signal number')
@@ -65,20 +66,20 @@ class Signalfd(_Eventlike):
             signals = [signals]
 
         for signal in signals:
-            _C.sigaddset(self._sigmask, signal)
+            _lib.sigaddset(self._sigmask, signal)
             
         self._update()
 
     def enable_all(self):
-        _C.sigfillset(self._sigmask)
+        _lib.sigfillset(self._sigmask)
         self._update()
         
     def disable(self, signal):
-        _C.sigdelset(self._sigmask, signal)
+        _lib.sigdelset(self._sigmask, signal)
         self._update()
         
     def disable_all(self):
-        _C.sigemptyset(self._sigmask)
+        _lib.sigemptyset(self._sigmask)
         self._update()
         
     def _read_events(self):

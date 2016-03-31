@@ -8,74 +8,27 @@ to interpret
 
 from .utils import UnknownError, InternalError, CLOEXEC_DEFAULT
 from collections import namedtuple
-from cffi import FFI
 import errno
 import math
 
 TimePair = namedtuple('TimePair', 'seconds nano_seconds')
 
-ffi = FFI()
-ffi.cdef("""
-#define TFD_CLOEXEC ...
-#define TFD_NONBLOCK ...
+from _timerfd_c import ffi, lib
 
-#define TFD_TIMER_ABSTIME ...
+TFD_CLOEXEC = lib.TFD_CLOEXEC
+TFD_NONBLOCK = lib.TFD_NONBLOCK
+TFD_TIMER_ABSTIME = lib.TFD_TIMER_ABSTIME
 
-#define CLOCK_REALTIME                  ...
-#define CLOCK_MONOTONIC                 ...
-#define CLOCK_PROCESS_CPUTIME_ID        ...
-#define CLOCK_THREAD_CPUTIME_ID         ...
-#define CLOCK_MONOTONIC_RAW             ...
-#define CLOCK_REALTIME_COARSE           ...
-#define CLOCK_MONOTONIC_COARSE          ...
-#define CLOCK_BOOTTIME                  ...
-#define CLOCK_REALTIME_ALARM            ...
-#define CLOCK_BOOTTIME_ALARM            ...
-//#define CLOCK_SGI_CYCLE                 ...
-//#define CLOCK_TAI                       ...
-
-typedef long int time_t;
-
-struct timespec {
-    time_t tv_sec; /* Seconds */
-    long tv_nsec; /* Nanoseconds */
-};
-
-struct itimerspec {
-    struct timespec it_interval; /* Interval for periodic timer */
-    struct timespec it_value; /* Initial expiration */
-};
-
-int timerfd_create(int clockid, int flags);
-
-int timerfd_settime(int fd, int flags,
-                    const struct itimerspec *new_value,
-                    struct itimerspec *old_value);
-
-int timerfd_gettime(int fd, struct itimerspec *curr_value);
-""")
-
-C = ffi.verify("""
-#include <sys/timerfd.h>
-#include <stdint.h> /* Definition of uint64_t */
-#include <time.h>
-""", libraries=[], ext_package="butter")
-
-
-TFD_CLOEXEC = C.TFD_CLOEXEC
-TFD_NONBLOCK = C.TFD_NONBLOCK
-TFD_TIMER_ABSTIME = C.TFD_TIMER_ABSTIME
-
-CLOCK_REALTIME = C.CLOCK_REALTIME
-CLOCK_MONOTONIC = C.CLOCK_MONOTONIC
-CLOCK_PROCESS_CPUTIME_ID = C.CLOCK_PROCESS_CPUTIME_ID
-CLOCK_THREAD_CPUTIME_ID = C.CLOCK_THREAD_CPUTIME_ID
-CLOCK_MONOTONIC_RAW = C.CLOCK_MONOTONIC_RAW
-CLOCK_REALTIME_COARSE = C.CLOCK_REALTIME_COARSE
-CLOCK_MONOTONIC_COARSE = C.CLOCK_MONOTONIC_COARSE
-CLOCK_BOOTTIME = C.CLOCK_BOOTTIME
-CLOCK_REALTIME_ALARM = C.CLOCK_REALTIME_ALARM
-CLOCK_BOOTTIME_ALARM = C.CLOCK_BOOTTIME_ALARM
+CLOCK_REALTIME = lib.CLOCK_REALTIME
+CLOCK_MONOTONIC = lib.CLOCK_MONOTONIC
+CLOCK_PROCESS_CPUTIME_ID = lib.CLOCK_PROCESS_CPUTIME_ID
+CLOCK_THREAD_CPUTIME_ID = lib.CLOCK_THREAD_CPUTIME_ID
+CLOCK_MONOTONIC_RAW = lib.CLOCK_MONOTONIC_RAW
+CLOCK_REALTIME_COARSE = lib.CLOCK_REALTIME_COARSE
+CLOCK_MONOTONIC_COARSE = lib.CLOCK_MONOTONIC_COARSE
+CLOCK_BOOTTIME = lib.CLOCK_BOOTTIME
+CLOCK_REALTIME_ALARM = lib.CLOCK_REALTIME_ALARM
+CLOCK_BOOTTIME_ALARM = lib.CLOCK_BOOTTIME_ALARM
 
 class TimerVal(object): 
     """ timer = TimerVal()
@@ -202,7 +155,7 @@ def timerfd(clock_type=CLOCK_MONOTONIC, flags=0, closefd=CLOEXEC_DEFAULT):
     if closefd:
         flags |= TFD_CLOEXEC
         
-    fd = C.timerfd_create(clock_type, flags)
+    fd = lib.timerfd_create(clock_type, flags)
     
     if fd < 0:
         err = ffi.errno
@@ -251,7 +204,7 @@ def timerfd_gettime(fd):
     assert isinstance(fd, int), 'fd must be an integer'
     
     curr_val = ffi.new('struct itimerspec *')
-    ret = C.timerfd_gettime(fd, curr_val)
+    ret = lib.timerfd_gettime(fd, curr_val)
     
     if ret < 0:
         err = ffi.errno
@@ -308,7 +261,7 @@ def timerfd_settime(fd, timer_spec, flags=0):
     
     old_timer_spec = ffi.new('struct itimerspec *')
 
-    ret = C.timerfd_settime(fd, flags, timer_spec, old_timer_spec)
+    ret = lib.timerfd_settime(fd, flags, timer_spec, old_timer_spec)
     
     if ret < 0:
         err = ffi.errno

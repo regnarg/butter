@@ -11,12 +11,12 @@ from os import read as _read
 from ._fanotify import fanotify_init, fanotify_mark, str_to_events
 
 # Import all the constants
-from ._fanotify import C as _C
+from ._fanotify import lib as _lib
 _l = locals()
-for key in dir(_C):
+for key in dir(_lib):
     if key.startswith('FAN_'):
-        _l[key] = getattr(_C, key)
-del key, _C, _l
+        _l[key] = getattr(_lib, key)
+del key, _lib, _l
 
 class Fanotify(_Eventlike):
     blocking = True

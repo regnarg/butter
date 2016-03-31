@@ -4,23 +4,12 @@ from .utils import UnknownError, CLOEXEC_DEFAULT
 from cffi import FFI
 import errno
 
-ffi = FFI()
-ffi.cdef("""
-#define EFD_CLOEXEC ...
-#define EFD_NONBLOCK ...
-#define EFD_SEMAPHORE ...
+from ._eventfd_c import ffi
+from ._eventfd_c import lib
 
-int eventfd(unsigned int initval, int flags);
-""")
-
-C = ffi.verify("""
-#include <sys/eventfd.h>
-#include <stdint.h> /* Definition of uint64_t */
-""", libraries=[], ext_package="butter")
-
-EFD_CLOEXEC = C.EFD_CLOEXEC
-EFD_NONBLOCK = C.EFD_NONBLOCK
-EFD_SEMAPHORE = C.EFD_SEMAPHORE
+EFD_CLOEXEC = lib.EFD_CLOEXEC
+EFD_NONBLOCK = lib.EFD_NONBLOCK
+EFD_SEMAPHORE = lib.EFD_SEMAPHORE
 
 def eventfd(inital_value=0, flags=0, closefd=CLOEXEC_DEFAULT):
     """Create a new eventfd
@@ -57,7 +46,7 @@ def eventfd(inital_value=0, flags=0, closefd=CLOEXEC_DEFAULT):
     if closefd:
         flags |= EFD_CLOEXEC
         
-    fd = C.eventfd(inital_value, flags)
+    fd = lib.eventfd(inital_value, flags)
     
     if fd < 0:
         err = ffi.errno

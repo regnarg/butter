@@ -21,94 +21,36 @@ intergrarated into butter in this module
            it performs
 """
 
-from __future__ import print_function
-
 from .utils import PermissionError, InternalError, UnknownError
 from os.path import isdir as _isdir
-from cffi import FFI as _FFI
 import errno as _errno
 
-_ffi = _FFI()
-_ffi.cdef("""
-# define MS_BIND ...
-# define MS_DIRSYNC ...
-# define MS_MANDLOCK ...
-# define MS_MOVE ...
-# define MS_NOATIME ...
-# define MS_NODEV ...
-# define MS_NODIRATIME ...
-# define MS_NOEXEC ...
-# define MS_NOSUID ...
-# define MS_RDONLY ...
-# define MS_RELATIME ...
-# define MS_REMOUNT ...
-# define MS_SILENT ...
-# define MS_STRICTATIME ...
-# define MS_SYNCHRONOUS ...
+from _system_c import ffi as _ffi
+from _system_c import lib as _lib
 
-# define MNT_FORCE ...
-# define MNT_DETACH ...
-# define MNT_EXPIRE ...
-# define UMOUNT_NOFOLLOW ...
+MS_BIND = _lib.MS_BIND
+MS_DIRSYNC = _lib.MS_DIRSYNC
+MS_MANDLOCK = _lib.MS_MANDLOCK
+MS_MOVE = _lib.MS_MOVE
+MS_NOATIME = _lib.MS_NOATIME
+MS_NODEV = _lib.MS_NODEV
+MS_NODIRATIME = _lib.MS_NODIRATIME
+MS_NOEXEC = _lib.MS_NOEXEC
+MS_NOSUID = _lib.MS_NOSUID
+MS_RDONLY = _lib.MS_RDONLY
+MS_RELATIME = _lib.MS_RELATIME
+MS_REMOUNT = _lib.MS_REMOUNT
+MS_SILENT = _lib.MS_SILENT
+MS_STRICTATIME = _lib.MS_STRICTATIME
+MS_SYNCHRONOUS = _lib.MS_SYNCHRONOUS
 
-# define HOST_NAME_MAX ...
-
-int mount(const char *source, const char *target,
-          const char *filesystemtype, unsigned long mountflags,
-          const void *data);
-int umount2(const char *target, int flags);
-extern int pivot_root(const char * new_root, const char * put_old);
-
-int gethostname(char *name, size_t len);
-int sethostname(const char *name, size_t len);
-
-// Muck with the types so cffi understands it
-// normmaly pid_t (defined as int32_t in
-// /usr/include/arm-linux-gnueabihf/bits/typesizes.h
-int32_t getpid(void);
-int32_t getppid(void);
-""")
-
-_C = _ffi.verify("""  
-//#include <sched.h>
-#include <sys/mount.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/syscall.h>
-#include <sys/mount.h>
-
-int32_t getpid(void){
-    return syscall(SYS_getpid);
-};
-
-int32_t getppid(void){
-    return syscall(SYS_getppid);
-};
-""", libraries=[], ext_package="butter")
-
-MS_BIND = _C.MS_BIND
-MS_DIRSYNC = _C.MS_DIRSYNC
-MS_MANDLOCK = _C.MS_MANDLOCK
-MS_MOVE = _C.MS_MOVE
-MS_NOATIME = _C.MS_NOATIME
-MS_NODEV = _C.MS_NODEV
-MS_NODIRATIME = _C.MS_NODIRATIME
-MS_NOEXEC = _C.MS_NOEXEC
-MS_NOSUID = _C.MS_NOSUID
-MS_RDONLY = _C.MS_RDONLY
-MS_RELATIME = _C.MS_RELATIME
-MS_REMOUNT = _C.MS_REMOUNT
-MS_SILENT = _C.MS_SILENT
-MS_STRICTATIME = _C.MS_STRICTATIME
-MS_SYNCHRONOUS = _C.MS_SYNCHRONOUS
-
-HOST_NAME_MAX = _C.HOST_NAME_MAX
+HOST_NAME_MAX = _lib.HOST_NAME_MAX
 
 # seems reasonable
 MAXPATHLEN = 256
 
-getpid = _C.getpid
-getppid = _C.getppid
+getpid = _lib.getpid
+getppid = _lib.getppid
 
 class Retry(Exception):
     """Filesystem now marked as expired"""
@@ -192,7 +134,7 @@ def mount(src, target, fs, flags=0, data=""):
     if isinstance(data, str):
         data = data.encode()
     
-    err = _C.mount(src, target, fs, flags, data)
+    err = _lib.mount(src, target, fs, flags, data)
 
     if err < 0:
         err = _ffi.errno
@@ -277,7 +219,7 @@ def umount(target, flags=0):
     if isinstance(target, str):
         target = target.encode()
 
-    err = _C.umount2(target, flags)
+    err = _lib.umount2(target, flags)
 
     if err < 0:
         err = _ffi.errno
@@ -333,7 +275,7 @@ def pivot_root(new, old):
     if isinstance(old, str):
         old = old.encode()
 
-    err = _C.pivot_root(new, old)
+    err = _lib.pivot_root(new, old)
 
     if err < 0:
         err = _ffi.errno
@@ -380,7 +322,7 @@ def sethostname(hostname):
     if isinstance(hostname, str):
         hostname = hostname.encode()
 
-    err = _C.sethostname(hostname, len(hostname))
+    err = _lib.sethostname(hostname, len(hostname))
 
     if err < 0:
         err = _ffi.errno
@@ -406,7 +348,7 @@ def gethostname():
     :rtype: str
     """
     hostname = _ffi.new('char[]', HOST_NAME_MAX)
-    err = _C.gethostname(hostname, len(hostname))
+    err = _lib.gethostname(hostname, len(hostname))
 
     if err < 0:
         err = _ffi.errno

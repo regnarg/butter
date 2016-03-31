@@ -1,52 +1,10 @@
 #!/usr/bin/env python
 
 from .utils import PermissionError, UnknownError
-from cffi import FFI
 import errno
 
-ffi = FFI()
-ffi.cdef("""
-
-#define CLONE_FS      ...
-#define CLONE_NEWNS   ...
-#define CLONE_NEWUTS  ...
-#define CLONE_NEWIPC  ...
-#define CLONE_NEWUSER ...
-#define CLONE_NEWPID  ...
-#define CLONE_NEWNET  ...
-
-//#long __clone(unsigned long flags, void *child_stack, ...);
-long __clone(unsigned long flags, void *child_stack,
-             void *ptid, void *ctid, void *regs);
-
-int unshare(int flags);
-#pragma weak setns
-int setns(int fd, int nstype);
-""")
-  
-
-_C = ffi.verify("""  
-#include <linux/sched.h>
-#include <unistd.h>
-#include <sys/types.h>
-
-// man page
-//long __clone(unsigned long flags, void *child_stack, ...);
-long __clone(unsigned long flags, void *child_stack,
-             void *ptid, void *ctid,
-             void *regs);
-
-int setns(int fd, int nstype) {
-    return -1;
-};
-""", libraries=[], ext_package="butter")
-
-CLONE_ALL = _C.CLONE_NEWIPC  | \
-            _C.CLONE_NEWNET  | \
-            _C.CLONE_NEWNS   | \
-            _C.CLONE_NEWUTS  | \
-            _C.CLONE_NEWPID  | \
-            _C.CLONE_NEWUSER
+from ._clone import ffi as _ffi
+from ._clone import lib as _C
 
 CLONE_NEWNS = _C.CLONE_NEWNS
 CLONE_NEWUTS = _C.CLONE_NEWUTS
@@ -54,7 +12,6 @@ CLONE_NEWIPC = _C.CLONE_NEWIPC
 CLONE_NEWUSER = _C.CLONE_NEWUSER
 CLONE_NEWPID = _C.CLONE_NEWPID
 CLONE_NEWNET = _C.CLONE_NEWNET
-
 
 def unshare(flags):
     """Unshare the current namespace and create a new one
@@ -82,7 +39,7 @@ def unshare(flags):
     fd = _C.unshare(flags)
 
     if fd < 0:
-        err = ffi.errno
+        err = _ffi.errno
         if err == errno.EINVAL:
             raise ValueError("Invalid value in flags")
         elif err == errno.EPERM:
@@ -103,8 +60,8 @@ def unshare(flags):
 def main():
     import os, errno, sys
     
-#    ret = _C.__clone(CLONE_NEWNET|CLONE_NEWUTS|CLONE_NEWIPC|CLONE_NEWNS, ffi.NULL)
-#    ret = _C.__clone(CLONE_NEWNET|CLONE_NEWUTS|CLONE_NEWIPC|CLONE_NEWNS, ffi.NULL, ffi.NULL, ffi.NULL, ffi.NULL)
+#    ret = _C.__clone(CLONE_NEWNET|CLONE_NEWUTS|CLONE_NEWIPC|CLONE_NEWNS, _ffi.NULL)
+#    ret = _C.__clone(CLONE_NEWNET|CLONE_NEWUTS|CLONE_NEWIPC|CLONE_NEWNS, _ffi.NULL, _ffi.NULL, _ffi.NULL, _ffi.NULL)
 
     ret = _C.unshare(CLONE_NEWNET|CLONE_NEWUTS|CLONE_NEWIPC|CLONE_NEWNS)
 #    ret = _C.unshare(CLONE_ALL)
@@ -113,7 +70,7 @@ def main():
 #            f.write("0 0 1\n")
         os.execl('/bin/bash', 'bash')
     else:
-        print(ret, ffi.errno, errno.errorcode[ffi.errno])
+        print(ret, _ffi.errno, errno.errorcode[_ffi.errno])
         print("failed")
         sys.exit(1)
 

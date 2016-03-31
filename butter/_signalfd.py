@@ -2,77 +2,10 @@
 """signalfd: Recive signals over a file descriptor"""
 
 from .utils import UnknownError, CLOEXEC_DEFAULT
-from cffi import FFI
-import platform
 import signal
 import errno
 
-ffi = FFI()
-ffi.cdef("""
-#define SFD_CLOEXEC ...
-#define SFD_NONBLOCK ...
-
-struct signalfd_siginfo {
-    uint32_t ssi_signo; /* Signal number */
-    int32_t ssi_errno; /* Error number (unused) */
-    int32_t ssi_code; /* Signal code */
-    uint32_t ssi_pid; /* PID of sender */
-    uint32_t ssi_uid; /* Real UID of sender */
-    int32_t ssi_fd; /* File descriptor (SIGIO) */
-    uint32_t ssi_tid; /* Kernel timer ID (POSIX timers)
-    uint32_t ssi_band; /* Band event (SIGIO) */
-    uint32_t ssi_overrun; /* POSIX timer overrun count */
-    uint32_t ssi_trapno; /* Trap number that caused signal */
-    int32_t ssi_status; /* Exit status or signal (SIGCHLD) */
-    int32_t ssi_int; /* Integer sent by sigqueue(3) */
-    uint64_t ssi_ptr; /* Pointer sent by sigqueue(3) */
-    uint64_t ssi_utime; /* User CPU time consumed (SIGCHLD) */
-    uint64_t ssi_stime; /* System CPU time consumed (SIGCHLD) */
-    uint64_t ssi_addr; /* Address that generated signal
-                        (for hardware-generated signals) */
-//    uint8_t pad[X]; /* Pad size to 128 bytes (allow for
-//                        additional fields in the future) */
-    ...;
-};
-
-//#define _SIGSET_NWORDS 32
-typedef struct
-{
-    unsigned long int __val[%d];
-} __sigset_t;
-
-typedef __sigset_t sigset_t;
-
-int signalfd(int fd, const sigset_t *mask, int flags);
-
-int sigemptyset(sigset_t *set);
-int sigfillset(sigset_t *set);
-int sigaddset(sigset_t *set, int signum);
-int sigdelset(sigset_t *set, int signum);
-int sigismember(const sigset_t *set, int signum);
-
-#define SIG_BLOCK ...
-#define SIG_UNBLOCK ...
-#define SIG_SETMASK ...
-
-int pthread_sigmask(int how, const sigset_t *set, sigset_t *oldset);
-""" % (16 if platform.architecture()[0] == "64bit" else 32))
-# define _SIGSET_NWORDS     (1024 / (8 * sizeof (unsigned long int)))
-# 32bits: 1024 / 8 / 4  = 32
-# 64bits: 1024 / 8 / 4  = 16
-
-C = ffi.verify("""
-#include <sys/signalfd.h>
-#include <stdint.h> /* Definition of uint64_t */
-#include <signal.h>
-""", libraries=[], ext_package="butter")
-
-SFD_CLOEXEC = C.SFD_CLOEXEC
-SFD_NONBLOCK = C.SFD_NONBLOCK
-
-SIG_BLOCK = C.SIG_BLOCK
-SIG_UNBLOCK = C.SIG_UNBLOCK
-SIG_SETMASK = C.SIG_SETMASK
+from ._signalfd_c import ffi, lib
 
 NEW_SIGNALFD = -1 # Create a new signal rather than modify an exsisting one
 
@@ -127,9 +60,9 @@ def signalfd(signals, fd=NEW_SIGNALFD, flags=0, closefd=CLOEXEC_DEFAULT):
             signals = [signals]
 
         for signal in signals:
-            C.sigaddset(mask, signal)
+            lib.sigaddset(mask, signal)
 
-    ret_fd = C.signalfd(fd, mask, flags)
+    ret_fd = lib.signalfd(fd, mask, flags)
     
     if ret_fd < 0:
         err = ffi.errno
@@ -196,9 +129,9 @@ def pthread_sigmask(action, signals):
         signals = [signals]
 
     for signal in signals:
-        C.sigaddset(new_sigmask, signal)
+        lib.sigaddset(new_sigmask, signal)
     
-    ret = C.pthread_sigmask(action, new_sigmask, ffi.NULL)
+    ret = lib.pthread_sigmask(action, new_sigmask, ffi.NULL)
     
     if ret < 0:
         err = ffi.errno
@@ -210,6 +143,13 @@ def pthread_sigmask(action, signals):
             # If you are here, its a bug. send us the traceback
             raise UnknownError(err)
 
+
+SFD_CLOEXEC = lib.SFD_CLOEXEC
+SFD_NONBLOCK = lib.SFD_NONBLOCK
+
+SIG_BLOCK = lib.SIG_BLOCK
+SIG_UNBLOCK = lib.SIG_UNBLOCK
+SIG_SETMASK = lib.SIG_SETMASK
 
 signum_to_signame = {val:key for key, val in signal.__dict__.items()
                      if isinstance(val, int) and "_" not in key}

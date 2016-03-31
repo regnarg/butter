@@ -5,23 +5,21 @@ from setuptools import setup
 
 import platform
 
-from butter import clone, _eventfd, _fanotify, _inotify
-from butter import _signalfd, splice, system, _timerfd, utils
 
 name = 'butter'
 path = 'butter'
 
 ext_modules = [
-    clone.ffi.verifier.get_extension(),
-    _eventfd.ffi.verifier.get_extension(),
-    _fanotify.ffi.verifier.get_extension(),
-    _inotify.ffi.verifier.get_extension(),
-#    seccomp._ffi.verifier.get_extension(),
-    _signalfd.ffi.verifier.get_extension(),
-    splice._ffi.verifier.get_extension(),
-    system._ffi.verifier.get_extension(),
-    _timerfd.ffi.verifier.get_extension(),
-    utils._ffi.verifier.get_extension(),
+    name + "/build/clone.py:ffi",
+    name + "/build/eventfd.py:ffi",
+    name + "/build/fanotify.py:ffi",
+    name + "/build/inotify.py:ffi",
+#    name + "/build/seccomp.py:ffi",
+    name + "/build/signalfd.py:ffi",
+    name + "/build/splice.py:ffi",
+    name + "/build/system.py:ffi",
+    name + "/build/timerfd.py:ffi",
+    name + "/build/utils.py:ffi",
     ]
 
 if platform.linux_distribution()[0] == 'debian' and \
@@ -30,7 +28,7 @@ if platform.linux_distribution()[0] == 'debian' and \
     pass
 else:
     from butter import seccomp
-    ext_modules.append(seccomp._ffi.verifier.get_extension())
+    ext_modules.append(name + '/build/seccomp.py:ffi')
 
 ## Automatically determine project version ##
 try:
@@ -112,9 +110,10 @@ setup(
 #    scripts = ['scripts/dosomthing'],
     zip_safe = False,
     ext_package = name,
-    ext_modules = ext_modules,
-    setup_requires = [],
-    install_requires = ['cffi>=0.7.2'],
+    setup_requires = ['cffi>=1.0.0'],
+    install_requires = ['cffi>=1.0.0'],
+    cffi_modules = ext_modules,
     tests_require = ['tox', 'pytest', 'pytest-cov', 'pytest-mock', 'mock'],
     cmdclass = {'test': PyTest},
 )
+

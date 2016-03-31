@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from select import select as _select
-from cffi import FFI as _FFI
 from os import close as _close
 from collections import deque
 import fcntl
@@ -9,6 +8,8 @@ import array
 import errno
 
 import platform
+
+from _utils_c import lib
 
 # Hack to backport PermissionError to older python versions
 if platform.python_version_tuple() < ('3', '0', '0'):
@@ -37,18 +38,10 @@ class UnknownError(Exception):
         error_name = errno.errorcode.get(self.errno, "UNKNOWN")
         return "{}: Error: {} ({})".format(self.__doc__, self.errno, error_name)
 
-_ffi = _FFI()
-_ffi.cdef("""
-#define FIONREAD ...
-""")
-
-_C = _ffi.verify("""
-#include <sys/ioctl.h>
-""", libraries=[], ext_package="butter")
 
 def get_buffered_length(fd):
     buf = array.array("I", [0])
-    fcntl.ioctl(fd, _C.FIONREAD, buf)
+    fcntl.ioctl(fd, lib.FIONREAD, buf)
     return buf[0]
             
 

@@ -14,12 +14,12 @@ from errno import EINVAL as _EINVAL
 import os as _os
 
 # Import all the constants
-from ._inotify import C as _C
+from ._inotify import lib as _lib
 _l = locals()
-for key in dir(_C):
+for key in dir(_lib):
     if key.startswith('IN_'):
-        _l[key] = getattr(_C, key)
-del key, _C, _l
+        _l[key] = getattr(_lib, key)
+del key, _lib, _l
 
 class Inotify(_Eventlike):
     def __init__(self, flags=0, closefd=_CLOEXEC_DEFAULT):
