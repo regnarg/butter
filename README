@@ -27,7 +27,7 @@ Whats Available
  * fanotify (Limited support, includes asyncio support)
  * splice
  * tee
- * vmsplice
+ * vmsplice (Removed, cant be done safely with Python, use os.writev instead)
  * gethostname
  * sethostname
  * mount

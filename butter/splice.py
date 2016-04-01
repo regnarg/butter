@@ -7,6 +7,8 @@ import errno as _errno
 from _splice_c import ffi as _ffi
 from _splice_c import lib as _lib
 
+NULL_TERMINATOR = 1 # length of \0 in bytes
+    
 def splice(fd_in, fd_out, in_offset=0, out_offset=0, len=0, flags=0):
     """Take data from fd_in and pass it to fd_out without going through userspace
     
@@ -132,64 +134,6 @@ def tee(fd_in, fd_out, len=0, flags=0):
             raise UnknownError(err)
 
     return size
-
-
-def vmsplice(fd, vec, flags=0):
-    """Write a list strings or byte buffers to the specified fd
-    
-    Arguments
-    ----------
-    :param file fd: File object or fd to write to
-    :param list vec: A list of strings to write to the pipe
-    :param int flags: Flags to specify extra options
-    
-    Flags
-    ------
-    SPLICE_F_MOVE: This is a noop in modern kernels and is left here for compatibility
-    SPLICE_F_NONBLOCK: Make vmsplice operations Non blocking (as long as the fd is non blocking)
-    SPLICE_F_MORE: unused for vmsplice()
-    SPLICE_F_GIFT: Pass ownership of the pages to the kernel. You must not modify data in place
-                   if using this option as the pages now belong to the kernel and bad things (tm)
-                   will happen
-                   if used, pages must be page aligned in both length and position
-    Returns
-    --------
-    :return: Number of bytes written
-    :rtype: int
-    
-    Exceptions
-    -----------
-    :raises ValueError: One of the file descriptors is not a pipe
-    :raises ValueError: Both file descriptors refer to the same pipe
-    :raises MemoryError: Insufficient kernel memory
-    """
-    if hasattr(fd, 'fileno'):
-        fd = fd.fileno()
-
-    assert isinstance(fd, int), 'fd must be an integer'
-    assert isinstance(flags, int), 'flags must be an integer'
-
-    n_vec =_ffi.new('struct iovec[]', len(vec))
-    for s, v in zip(vec, n_vec) :
-        v.iov_base = _lib.convert_str_to_void(s)
-        v.iov_len = len(s)
-    
-    size = _lib.vmsplice(fd, n_vec, len(vec), flags)
-
-    if size < 0:
-        err = _ffi.errno
-        if err == _errno.EBADF:
-            raise ValueError("fd is not valid or does not refer to a pipe")
-        if err == _errno.EINVAL:
-            raise ValueError("nr_segs is 0 or greater than IOV_MAX; or memory not aligned if SPLICE_F_GIFT set")
-        elif err == _errno.ENOMEM:
-            raise MemoryError("Insufficent kernel memory available")
-        else:
-            # If you are here, its a bug. send us the traceback
-            raise UnknownError(err)
-
-    return size
-
 
 SPLICE_F_MOVE = _lib.SPLICE_F_MOVE    
 SPLICE_F_NONBLOCK = _lib.SPLICE_F_NONBLOCK
