@@ -3,13 +3,16 @@
 Release History
 ---------------
 
-0.12 (2015-09-27)
-+++++++++++++++++++
+0.12 (2015-04-02)
++++++++++++++++++
 
 - Add support for new timer types including 'slack' timers and timers that can wake a system from suspend
 - Hid the clone.C class as clone._C as it is not intended for general consumption
 - Provided C implementation for pivot_root as it was not provided by glibc
 - Migrated to cffi >= 1.0.0 to fix build bugs
+
+**API Changes**
+
 - Removed vmsplice() due to safety issues (does not copy bytes but maps live data, GC causes liveliness issues)
 
 0.11.2 (2015-09-27)
