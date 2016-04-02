@@ -135,6 +135,15 @@ def tee(fd_in, fd_out, len=0, flags=0):
 
     return size
 
+def vmsplice(fd, vec, flags=0):
+    """This cannot be implemented safely under python due to the GC
+    
+    Please use os.writev() instead which has a near identical api and effect
+    
+    :raises NotImplemented: This is always raised as this operation has been removed
+    """
+    raise NotImplementedError("Removed due to safety concerns")
+
 SPLICE_F_MOVE = _lib.SPLICE_F_MOVE    
 SPLICE_F_NONBLOCK = _lib.SPLICE_F_NONBLOCK
 SPLICE_F_MORE = _lib.SPLICE_F_MORE    

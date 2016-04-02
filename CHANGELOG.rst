@@ -3,6 +3,11 @@
 Release History
 ---------------
 
+0.12.1 (2015-05-02)
++++++++++++++++++++
+
+- Added stub for removed vmsplice() that raises NotImplemented
+
 0.12 (2015-04-02)
 +++++++++++++++++
 
