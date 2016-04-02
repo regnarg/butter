@@ -79,7 +79,6 @@ Dev packages required:
 
 to install butter use the following command:
 
-    $ pip install cffi # must come first due to bootstrapping issues
     $ pip install setuptools 
     $ pip install butter
 
