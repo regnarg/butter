@@ -1,0 +1,143 @@
+========
+ Butter
+========
+"Making things that little bit butter under linux"
+
+Butter is a library to integrate some of Linux's low level features into python
+eg signalfd, eventfd and timerfd. most of these functions are handy if you are 
+looking into creating non-blocking servers, dealing with event loops or writing
+high performance services
+
+Features
+---------
+ * Full testing of all error conditions in unit tests
+ * Small set of exceptions to deal with
+ * asyncio compatible versions of calls
+ * Emulationa nd reuse of built in objects wherever possible
+ * Both low level 1:1 calls and a high level interface available
+ * Default values chosen follow 'least surprise' principle (eg CLOCK_MONOTONIC
+   instead of CLOCK_REALTIME to avoid issues with clock updates)
+ * Single codebase supporting python 2 and python 3 without modifcation for 
+   easier forward migration
+
+Whats Available
+----------------
+ * inotify (Complete support, includes asyncio support)
+ * seccomp (Limited support)
+ * fanotify (Limited support, includes asyncio support)
+ * splice
+ * tee
+ * vmsplice (Removed, cant be done safely with Python, use os.writev instead)
+ * gethostname
+ * sethostname
+ * mount
+ * umount
+ * pivot_root
+ * getpid (bypasses glibc caching)
+ * getppid (bypasses glibc caching)
+ * eventfd (includes asyncio support)
+ * timerfd (includes asyncio support)
+ * 'sloppy' timers (inaccurate timers that may experince jitter for power saving)
+ * Wake timers (timers that may wake a system from suspend)
+ * pthread_sigmask (Avalible in python3.x but backported for python2.7)
+ * signalfd (includes asyncio support)
+
+Whats Coming
+-------------
+Most of these exist in v0.2 as ctypes code. these are currently being rewritten
+to use cffi for speed and compatibility with pypy
+
+ * posix/linux aio (scatter/gather read writes with a completion based API 
+   instead of a 'ready' based interface, eg similar to IOCP on windows)
+ * Sphinx documentation
+ * Example code
+ * More unit tests
+
+Supported Python
+-----------------
+Butter currently supported the following python interpreters
+
+* pypy (2.7 and 3.2 python implementations)
+* cpython 3.4 (required for asyncio support)
+* cpython 3.x
+* cpython 2.7
+
+Butter may work on older versions however it has not been tested on anything 
+except the above interpreters and may break without warning
+
+Installing
+-----------
+butter makes use of several C libraries to provide low level functionality. most
+of the compilation is taken care of by setup.py and cffi at install time however 
+you will need to ensure that some header files are available on the machine doing 
+the compilation (which may be different to the machine butter is being packaged 
+for and Finally installed on)
+
+Dev packages required:
+ * libseccomp
+ * kernel headers for a fairly recent kernel (3.x recommended)
+
+to install butter use the following command:
+
+    $ pip install setuptools 
+    $ pip install butter
+
+this will pull in all the required dependencies and compile the required C 
+extensions
+
+for asyncio support, python 3.4 or newer is required. importing the asyncio 
+modules on older versions of python will throw a syntax error. Hence why these
+are namespaced under butter.asyncio rather than in the base modules
+
+Design
+-------
+The 'fd' apis have been designed first as thin wrappers around the underlying
+kernel syscalls. A File-like object that then uses these syscalls is then made 
+available that obeys the 'event like' interface and is based on the interface
+provided by File and friends. They are intended to be drop in replacements and 
+be used with the select module
+
+Event-like objects
++++++++++++++++++++
+Event like objects are identical to filelike objects except they have the 
+following extra methods to replace the disabled read/readline/write/writeline
+functionality
+
+ * read_event:  Return a single event
+ * read_events: Return all cached events OR read all events from the kernel
+
+AsyncIO
+++++++++
+Some syscalls (ones that deal with fd's) have been made to work with the 
+asyncio framework that became avalible in python3.4. The asyncio enabled
+object is named after the normal Event-like object equivlent with '_async'
+after it, eg Inotify => Inotify_async. These asyncio Eventlike objects are
+designed to act and behave like the asyncio.Queue object without the ability
+to write events to the queue (ie they can only be read from and events are
+injected from the fd as required)
+
+
+Exceptions
++++++++++++
+Butter was designed to have a small set of easily catchable exceptions and to 
+reuse the builtin exceptions wherever possible. The list below is a rough
+guide of what exceptions you can expect to receive
+
+ * OSError/MemoryError: The Operating system was unable to fulfill your request
+ * ValueError: One of the arguments is invalid
+ * PermissionError: You do not have sufficient Privileges to use this call
+ * InternalError: The function hit an internal bug that was never expected to
+   be hit but is tested for just in case. Please consider filing a bug report
+ * UnknownError: The Error is not specifically handled and unexpected, see 
+   exception.errno for the Error code that generated this exception
+
+Projects using Butter
+---------------------
+ * https://pypi.python.org/pypi/icheck/ (Written by the author, inotify)
+ * https://pypi.python.org/pypi/igor-inotify/ (Written by the author, inotify)
+
+Contact Details
+---------------
+ * For pull requests, patches, feature requests and support
+   please email the author (code@pocketnix.org)
+ * xmpp: dablitz@pocketnix.org or code@conference.pocketnix.org
