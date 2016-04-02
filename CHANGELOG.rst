@@ -7,6 +7,7 @@ Release History
 +++++++++++++++++++
 
 - Added stub for removed vmsplice() that raises NotImplemented
+- Remove note about installing cffi first as it is no longer required since v0.12
 
 0.12 (2015-04-02)
 +++++++++++++++++
