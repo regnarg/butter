@@ -166,3 +166,9 @@ develop:
 	
 pypi:
 	$(PYTHON) ./setup.py sdist --formats=zip,bztar upload
+
+push:
+	hg push
+
+release: push pypi
+	:
