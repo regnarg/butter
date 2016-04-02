@@ -1,6 +1,5 @@
-========
- Butter
-========
+Butter
+=======
 "Making things that little bit butter under linux"
 
 Butter is a library to integrate some of Linux's low level features into python
@@ -97,8 +96,7 @@ available that obeys the 'event like' interface and is based on the interface
 provided by File and friends. They are intended to be drop in replacements and 
 be used with the select module
 
-Event-like objects
-+++++++++++++++++++
+### Event-like objects
 Event like objects are identical to filelike objects except they have the 
 following extra methods to replace the disabled read/readline/write/writeline
 functionality
@@ -106,8 +104,7 @@ functionality
  * read_event:  Return a single event
  * read_events: Return all cached events OR read all events from the kernel
 
-AsyncIO
-++++++++
+### AsyncIO
 Some syscalls (ones that deal with fd's) have been made to work with the 
 asyncio framework that became avalible in python3.4. The asyncio enabled
 object is named after the normal Event-like object equivlent with '_async'
@@ -116,9 +113,7 @@ designed to act and behave like the asyncio.Queue object without the ability
 to write events to the queue (ie they can only be read from and events are
 injected from the fd as required)
 
-
-Exceptions
-+++++++++++
+### Exceptions
 Butter was designed to have a small set of easily catchable exceptions and to 
 reuse the builtin exceptions wherever possible. The list below is a rough
 guide of what exceptions you can expect to receive
