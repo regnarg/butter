@@ -1,5 +1,6 @@
 syntax: glob
 
+*.egg/
 *egg-info/
 dist/
 env/
