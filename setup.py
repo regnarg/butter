@@ -86,7 +86,7 @@ for readme_name in ("README", "README.rst", "README.md",
 setup(
     name = name,
     version = get_version(),
-    packages = [path, path + "/asyncio"],
+    packages = [path, path + "/asyncio", path + "/build"],
     author = "Da_Blitz",
     author_email = "code@pocketnix.org",
     maintainer=None,
