@@ -170,5 +170,11 @@ pypi:
 push:
 	hg push
 
-release: push pypi
+release: push pypi readme
 	:
+
+readme: readme_dryrun
+	python setup.py register
+
+readme_dryrun:
+	python setup.py register --verbose --dry-run --strict
