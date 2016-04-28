@@ -75,10 +75,17 @@ class PyTest(TestCommand):
 
 ## Try and extract a long description ##
 readme = ""
-for readme_name in ("README", "README.rst", "README.md",
-                    "CHANGELOG", "CHANGELOG.rst", "CHANGELOG.md"):
+for readme_name in ("README", "README.rst", "README.md",):
     try:
         readme += open(readme_name).read() + "\n\n"
+        break
+    except (OSError, IOError):
+        continue
+
+for readme_name in ("CHANGELOG", "CHANGELOG.rst", "CHANGELOG.md"):
+    try:
+        readme += open(readme_name).read() + "\n\n"
+        break
     except (OSError, IOError):
         continue
 
