@@ -132,12 +132,12 @@ guide of what exceptions you can expect to receive
    exception.errno for the Error code that generated this exception
 
 Projects using Butter
----------------------
+----------------------
  * https://pypi.python.org/pypi/icheck/ (Written by the author, inotify)
  * https://pypi.python.org/pypi/igor-inotify/ (Written by the author, inotify)
 
 Contact Details
----------------
+----------------
  * For pull requests, patches, feature requests and support
    please email the author (code@pocketnix.org)
  * xmpp: dablitz@pocketnix.org or code@conference.pocketnix.org
