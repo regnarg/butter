@@ -13,7 +13,7 @@ Features
  * Full testing of all error conditions in unit tests
  * Small set of exceptions to deal with
  * asyncio compatible versions of calls
- * Emulationa nd reuse of built in objects wherever possible
+ * Emulation and reuse of built in objects wherever possible
  * Both low level 1:1 calls and a high level interface available
  * Default values chosen follow 'least surprise' principle (eg CLOCK_MONOTONIC
    instead of CLOCK_REALTIME to avoid issues with clock updates)
