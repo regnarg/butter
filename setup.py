@@ -12,6 +12,7 @@ ext_modules = [
     name + "/build/clone.py:ffi",
     name + "/build/eventfd.py:ffi",
     name + "/build/fanotify.py:ffi",
+    name + "/build/fhandle.py:ffi",
     name + "/build/inotify.py:ffi",
 #    name + "/build/seccomp.py:ffi",
     name + "/build/signalfd.py:ffi",
