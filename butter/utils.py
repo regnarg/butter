@@ -9,7 +9,7 @@ import errno
 
 import platform
 
-from _utils_c import lib
+from ._utils_c import lib
 
 # Hack to backport PermissionError to older python versions
 if platform.python_version_tuple() < ('3', '0', '0'):
@@ -49,7 +49,7 @@ class Eventlike(object):
     _fd = None
     def __init__(self, *args, **kwargs):
         """*** This is a cooprative superclass, ensure you use super in the subclass's __init__ ***
-        eg: super(self.__class__, self).__init__(*args, **kwargs)
+        eg: super(SubClass, self).__init__(*args, **kwargs)
         """
         self._events = []
         super(Eventlike, self).__init__()

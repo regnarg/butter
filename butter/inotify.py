@@ -23,7 +23,7 @@ del key, _lib, _l
 
 class Inotify(_Eventlike):
     def __init__(self, flags=0, closefd=_CLOEXEC_DEFAULT):
-        super(self.__class__, self).__init__()
+        super(Inotify, self).__init__()
         fd = inotify_init(flags, closefd=closefd)
         self._fd = fd
         

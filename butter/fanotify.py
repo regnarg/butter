@@ -22,7 +22,7 @@ class Fanotify(_Eventlike):
     blocking = True
     
     def __init__(self, flags, event_flags=O_RDONLY, closefd=_CLOEXEC_DEFAULT):
-        super(self.__class__, self).__init__()
+        super(Fanotify, self).__init__()
         self._fd = fanotify_init(flags, event_flags, closefd=closefd)
 
         self._events = []
