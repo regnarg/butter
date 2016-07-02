@@ -51,8 +51,7 @@ class Fanotify(_Eventlike):
     def _read_events(self):
         fd = self.fileno()
 
-        buf_len = _get_buffered_length(fd)
-        raw_events = _read(fd, buf_len)
+        raw_events = _read(fd, 4096)
 
         events = str_to_events(raw_events)
 
