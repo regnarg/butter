@@ -56,11 +56,13 @@ def fanotify_mark(fd, path, mask, flags, dfd=0):
     assert isinstance(dfd, int), 'DFD must be an integer'
     assert isinstance(flags, int), 'Flags must be an integer'
     assert isinstance(mask, int), 'Mask must be an integer'
-    assert isinstance(path, (str, bytes)), 'Path must be a string'
-    assert len(path) > 0, 'Path cannot be 0 chars'
+    assert isinstance(path, (str, bytes)) or path is None, 'Path must be a string'
+    assert path is None or len(path) > 0, 'Path cannot be 0 chars'
     
     if isinstance(path, str):
         path = path.encode()
+    elif path is None:
+        path = ffi.cast("const char *", 0)
 
     ret = lib.fanotify_mark(fd, flags, mask, dfd, path)
     if ret < 0:
@@ -93,7 +95,7 @@ class FanotifyEvent(object):
     def filename(self):
         if not self._filename:
             try:
-                name = readlink(join('/proc', str(getpid()), 'fd', str(self.fd)))
+                name = readlink(join('/proc', 'self', 'fd', str(self.fd)))
                 self._filename = name
             except OSError:
                 self._filename = "<Unknown>"

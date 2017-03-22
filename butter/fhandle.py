@@ -2,7 +2,7 @@
 """fhandle: wrappers for the name_to_handle_at and open_by_handle_at syscalls."""
 
 from ._fhandle_c import ffi, lib
-import os, errno
+import sys, os, errno
 from collections import namedtuple
 
 AT_FDCWD = lib.AT_FDCWD
@@ -16,6 +16,7 @@ class StaleHandle(OSError):
         OSError.__init__(self, errno.ESTALE, os.strerror(errno.ESTALE))
 
 def name_to_handle_at(dirfd, pathname, flags=0):
+    if isinstance(pathname, str): pathname = pathname.encode(sys.getfilesystemencoding())
     c_handle = ffi.new('struct file_handle *', {'handle_bytes': lib.MAX_HANDLE_SZ, 'f_handle': lib.MAX_HANDLE_SZ})
     mount_id = ffi.new('int *')
     ret = lib.name_to_handle_at(dirfd, pathname, c_handle, mount_id, flags)
