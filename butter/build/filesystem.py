@@ -12,6 +12,9 @@ ffi.cdef("""
 
 int renameat2(int olddirfd, const char *oldpath,
              int newdirfd, const char *newpath, unsigned int flags);
+
+int syncfs(int fd);
+
 """)
 
 ffi.set_source("_filesystem_c", """

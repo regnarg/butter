@@ -13,3 +13,8 @@ def renameat2(olddirfd, oldpath, newdirfd, newpath, flags):
     ret = lib.renameat2(olddirfd, os.fsencode(oldpath), newdirfd, os.fsencode(newpath), flags)
     if ret < 0:
         raise OSError(ffi.errno, os.strerror(ffi.errno))
+
+def syncfs(fd):
+    ret = lib.syncfs(fd)
+    if ret < 0:
+        raise OSError(ffi.errno, os.strerror(ffi.errno))
